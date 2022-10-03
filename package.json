@@ -1,0 +1,30 @@
+{
+  "name": "watchdog",
+  "type": "module",
+  "version": "1.0.0-alpha",
+  "main": "src/index.js",
+  "repository": "https://github.com/OoP1nk/Watchdog",
+  "author": "OoP1nk",
+  "license": "GNU-2",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "start:dev": "nodemon .",
+    "start": "node .",
+    "deploy": ""
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.11.0",
+    "chalk": "4.1.2",
+    "discord.js": "^14.5.0",
+    "dotenv": "^16.0.2",
+    "libsodium-wrappers": "^0.7.10",
+    "ms": "^2.1.3",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.10"
+  }
+}

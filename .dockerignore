@@ -1,0 +1,10 @@
+Dockerfile
+
+# Github workflows ETC.
+.github
+
+# Any mock data used in testing
+__mocks__
+
+# Scripts folder for deployment & development
+scripts/
