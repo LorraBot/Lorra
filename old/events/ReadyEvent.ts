@@ -12,18 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-import { Client } from 'discord.js';
-import BaseEvent from '../util/structures/BaseEvent.js';
+import BaseEvent from "../util/structures/BaseEvent";
+import Lorra from "../client";
 
-export default class InteractionEvent extends BaseEvent {
-    constructor() {
-        super("interactionCreate");
-    }
+export default class ReadyEvent extends BaseEvent {
+    constructor() {super('ready');}
 
-    /**
-     * @param {Client} client 
-     */
-    async exec(client) {
-        
+    async exec(client: Lorra) {
+        client.logger.info('logged on!');
     }
 }

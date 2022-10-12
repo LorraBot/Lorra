@@ -12,19 +12,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import 'dotenv/config';
+import 'reflect-metadata';
 
-import { Client, IntentsBitField } from 'discord.js';
-import CommandManager from './managers/CommandManager.js';
-import EventManager from './managers/EventManager.js';
-import MainLogger from './util/MainLogger.js';
+import { IntentsBitField } from 'discord.js';
+import Lorra from './client';
 
 export default class Bot {
-    _client;
-    _eventManager;
-    static _instance = new Bot();
-    static getInstance() { return this._instance; }
-    static main() {
-        this._client = new Client({
+    public static main(): void {
+        var client = new Lorra({
             intents: [
                 IntentsBitField.Flags.Guilds,
                 IntentsBitField.Flags.GuildMembers,
@@ -34,16 +30,8 @@ export default class Bot {
                 IntentsBitField.Flags.MessageContent
             ]
         });
-        this._eventManager = new EventManager();
-        this._commandManager = new CommandManager();
-        this._client.login(process.env.TOKEN);
+        client.login(process.env.TOKEN);
     }
-    /**
-     * @return {Client} Discord client
-     */
-    static get client() { return this._client; }
-
-    static get logger() { return MainLogger.getLogger(); }
 }
 
 void Bot.main();

@@ -12,23 +12,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-import { Client } from "discord.js";
 
-export default class BaseEvent {
-    _name;
+import BaseCommand from "./BaseCommand";
+import Lorra from "../../../client";
+import { 
+    ApplicationCommandType, 
+    ChatInputCommandInteraction, 
+    CommandInteraction, 
+    RESTPostAPIApplicationCommandsJSONBody
+} from "discord.js";
 
-    /**
-     * @param {string} name 
-     */
-    constructor(name) {
-        this._name = name;
+export default abstract class ChatInputCommand extends BaseCommand {
+    constructor(command: RESTPostAPIApplicationCommandsJSONBody, global: boolean) {
+        super(command, global);
     }
-
-    get name() { return this._name; }
-
-    /**
-     * @param {Client} client 
-     * @param  {...any} args 
-     */
-    exec(client, ...args) { }
+    get type() { return ApplicationCommandType.ChatInput; }
+    async exec(client: Lorra, interaction: CommandInteraction) { }
 }

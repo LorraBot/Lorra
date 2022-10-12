@@ -15,26 +15,17 @@
 import chalk from 'chalk';
 
 export default class MainLogger {
-    _format = `[${chalk.blue(new Date().toUTCString())}] [%type%]: %msg%`
+    private format = `[${chalk.blue(new Date().toUTCString())}] [%type%]: %msg%`
     static _logger = new MainLogger();
     static getLogger() { return this._logger }
 
-    /**
-     * @param {string} message 
-     */
-    info(message) {
-        return console.log(this._format.replace("%type%", chalk.cyan("INFO")).replace("%msg%", message));
+    info(message: string) {
+        return console.log(this.format.replace("%type%", chalk.cyan("INFO")).replace("%msg%", message));
     }
-    /**
-     * @param {string} message 
-     */
-    error(message) {
-        return console.log(this._format.replace("%type%", chalk.red("ERROR")).replace("%msg%", message));
+    error(message: string) {
+        return console.log(this.format.replace("%type%", chalk.red("ERROR")).replace("%msg%", message));
     }
-    /**
-     * @param {string} message 
-     */
-    critical(message) {
-        return console.log(this._format.replace("%type%", chalk.redBright("CRITICAL")).replace("%msg%", message));
+    critical(message: string) {
+        return console.log(this.format.replace("%type%", chalk.redBright("CRITICAL")).replace("%msg%", message));
     }
 }

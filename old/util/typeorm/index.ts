@@ -12,26 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+import { Guilds } from './entities/Guilds';
 
-import pkg from "discord.js";
+export const GuildsRepo = Guilds;
 
-const { RESTPostAPIApplicationCommandsJSONBody } = pkg;
-
-export default class BaseCommand {
-    _name;
-    _type;
-    _command;
-    /**
-     * @param {string} name 
-     * @param {RESTPostAPIApplicationCommandsJSONBody} command 
-     */
-    constructor(name, command) {
-        this._name = name;
-        this._type = command.type ? command.type : undefined;
-        this._command = command;
-    }
-
-    get name() { return this._name; }
-    get type() { return this._type; }
-    get command() { return this._command; }
-}
+export const entities = [
+    Guilds
+]
