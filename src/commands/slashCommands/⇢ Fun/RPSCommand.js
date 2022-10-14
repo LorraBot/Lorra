@@ -4,16 +4,23 @@ const Lorra = require('../../../client/Lorra');
 const SlashCommand = require('../../../structures/command/SlashCommand');
 const CommandStatus = require('../../../util/CommandStatus');
 const ColorUtils = require('../../../util/ColorUtils');
+const crypto = require('node:crypto');
 const ms = require('ms');
 const {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
-    EmbedBuilder, ButtonBuilder,
+    EmbedBuilder,
+    ButtonBuilder,
     ButtonStyle,
-    ComponentType,
     ActionRowBuilder,
-    Collection
+    ComponentType
 } = require('discord.js');
+
+const options = ['rock', 'paper', 'scissors'];
+
+const algorithm = 'aes-256-cbc';
+const key = crypto.randomBytes(32);
+const iv = crypto.randomBytes(16);
 
 /**
  * Test your chances with Rock, Paper, Scissors
@@ -23,11 +30,6 @@ class RPSCommand extends SlashCommand {
         super(new SlashCommandBuilder()
             .setName('rps')
             .setDescription('🪨Rock.. 📃Paper.. ✂️Scissors.. SHOOT!')
-            .addUserOption(option =>
-                option.setName('user')
-                    .setDescription('❓What do you pick? Rock, Paper or Scissors.')
-                    .setRequired(true)
-            )
             .toJSON(), CommandStatus.Testing);
     }
 
@@ -36,88 +38,90 @@ class RPSCommand extends SlashCommand {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(client, interaction) {
-        const results = new Collection();
-        const user = interaction.options.getUser('user', true);
-
-        if (interaction.user.id === user.id)
-            return interaction.reply(
-                {
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Oh Noo!")
-                            .setDescription("You can't just play yourself. Find someone to play a game with and try again :D")
-                            .setColor('Red')
-                    ],
-                    ephemeral: true
-                });
+        // Choices
+        var botChoiceObj = this.#encrypt(options[Math.floor(Math.random() * options.length)]);
+        var botChoiceHash = botChoiceObj.content;
+        console.log(botChoiceObj);
+        // Create the message embed
+        const embed = new EmbedBuilder().setColor(ColorUtils.Invisible);
 
         // -- Components --
-        const RBtn = new ButtonBuilder().setEmoji('🪨').setLabel('Rock').setCustomId('rock').setStyle(ButtonStyle.Danger);
-        const PBtn = new ButtonBuilder().setEmoji('📃').setLabel('Paper').setCustomId('paper').setStyle(ButtonStyle.Primary);
-        const SBtn = new ButtonBuilder().setEmoji('✂️').setLabel('Scissors').setCustomId('scissors').setStyle(ButtonStyle.Secondary);
-        const row = new ActionRowBuilder().addComponents(RBtn, PBtn, SBtn);
+        const RockBtn = new ButtonBuilder().setEmoji('🪨').setLabel('Rock').setCustomId('rock').setStyle(ButtonStyle.Danger);
+        const PaperBtn = new ButtonBuilder().setEmoji('📃').setLabel('Paper').setCustomId('paper').setStyle(ButtonStyle.Primary);
+        const ScissorsBtn = new ButtonBuilder().setEmoji('✂️').setLabel('Scissors').setCustomId('scissors').setStyle(ButtonStyle.Secondary);
+        const row = new ActionRowBuilder().addComponents(RockBtn, PaperBtn, ScissorsBtn);
         // ----
 
-        await interaction.reply({
-            content: `${user}`,
+        interaction.reply({
             embeds: [
                 new EmbedBuilder()
-                    .setTitle('Rock..Paper..Scissors.. SHOOT!!')
-                    .setColor(ColorUtils.Invisible)
-                    .setDescription(`${interaction.user} has invited ${user} to play Rock..Paper..Scissors. Use the buttons below to select your choice.\n*Button session will end in 1m*`)
+                    .setTitle('🪨Rock.. 📃Paper.. ✂️Scissors.. SHOOT! 💥')
+                    .setAuthor({ iconURL: interaction.user.avatarURL(), name: "*Expires: 1m*" })
+                    .setDescription('Select a button to choose your answer.\n*Session will expire in 1m*')
+                    .addFields({ name: 'Notice', value: "*To ensure everything is fair the bot generates a response before user input and enters a hash (hidden) version of the response in the footer.*" })
+                    .setFooter({ text: `*${botChoiceHash}*` })
             ],
             components: [row]
         });
 
-        const filter = i => {
-            const responded = results.get(i.user.id);
-            if (responded) {
-                i.reply({ embeds: [new EmbedBuilder().setTitle('Ohh Noo! Looks like you have already chosen.').setColor('Red')], ephemeral: true });
-            }
-            return (i.user.id === interaction.user.id || i.user.id === user.id) && !responded;
-        }
-        const collector = interaction.channel.createMessageComponentCollector({ componentType: ComponentType.Button, time: ms('1m'), filter, maxUsers: 2 });
+        const filter = i => i.user.id === interaction.user.id;
+        const collector = interaction.channel.createMessageComponentCollector({ componentType: ComponentType.Button, filter, time: ms('1m'), maxUsers: 1 });
 
-        collector.on('collect', (interaction) => {
-            results.set(interaction.user.id, interaction.component.customId);
-            console.log(interaction.component.customId);
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle(`Option Chosen!`)
-                        .setDescription(`You have chosen ${interaction.component.label}. Good Luck!`)
-                        .setColor('Green')
-                ],
-                ephemeral: true
-            });
-        });
-        collector.on('end', () => {
-            // -- Disable Buttons --
+        collector.on('end', async (collection) => {
+            // -- Deactivate Buttons --
             row.components.forEach((value) => value.setDisabled(true));
             interaction.editReply({ components: [row] });
-            // ----
-            const response = new EmbedBuilder().setColor('Green');
+            //----
+            // Decode the bots answer
+            const botChoice = this.#decode(botChoiceObj);
+            console.log(botChoice);
+            const userChoice = collection.get(collection.firstKey()).component.customId;
+            // Checks if the Bot's and User's reaction are the same
+            if (userChoice === botChoice) embed.setTitle(`Uh OH! Looks like we both chose ${uChoice}.`)
+                .setDescription('Run the command again and see what your outcome is :D')
+                .setColor(ColorUtils.Invisible);
 
-            const res1 = results.get(interaction.user.id);
-            const res2 = results.get(user.id);
-
-            if (res1 === res2)
-                return interaction.followUp({ embeds: [response.setTitle('Looks like it was a draw 🤷')] });
-
-            if (res1 === 'rock' && res2 === 'paper') {
-                response.setTitle(`🎉 ${user.username} has Won! 🎉`);
-            } else if (res1 === 'paper' && res2 === 'scissors') {
-                response.setTitle(`🎉 ${user.username} has Won! 🎉`);
-            } else if (res1 === 'scissors' && res2 === 'rock') {
-                response.setTitle(`🎉 ${user.username} has Won! 🎉`);
+            // Choice Decider
+            if (userChoice === 'rock' && botChoice === 'scissors') {
+                embed.setTitle('Wowwww! You WON! Congratulations 🎉')
+                    .setDescription("🪨Rock **CRUSHES** ✂️Scissors!");
+            } else if (userChoice === 'paper' && botChoice === 'rock') {
+                embed.setTitle('Wowwww! You WON! Congratulations 🎉')
+                    .setDescription("📃Paper **COVERS** 🪨Rock!");
+            } else if (userChoice === 'scissors' && botChoice === 'paper') {
+                embed.setTitle('Wowwww! You WON! Congratulations 🎉')
+                    .setDescription("✂️Scissor's cut 📃Paper!");
             } else {
-                response.setTitle(`🎉 ${interaction.user.username} has Won! 🎉`);
+                embed.setTitle('Oh Nooooo! Looks like you lost!')
+                    .setDescription(`I chose \`${botChoice}\`. Let's play again :D`);
             }
-            return interaction.followUp({
-                embeds: [response]
-            });
+            // Return the interation
+            return await interaction.followUp({ embeds: [embed] });
         });
-        results.clear();
+    }
+
+    /**
+     * @param {string} value 
+     * @returns {JSON} encoded value 
+     */
+    #encrypt(value) {
+        let cipher = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
+        let encrypted = cipher.update(value);
+        encrypted = Buffer.concat([encrypted, cipher.final()]);
+        return { iv: iv.toString('hex'), content: encrypted.toString('hex') };
+    }
+
+    /**
+     * @param {JSON} obj 
+     * @returns {string} Actual value
+     */
+    #decode(obj) {
+        let iv = Buffer.from(obj.iv, 'hex');
+        let encryptedText = Buffer.from(obj.content, 'hex');
+        let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
     }
 }
 
