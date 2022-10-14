@@ -1,6 +1,6 @@
 'use strict';
 
-const { SlashCommandBuilder, CommandInteraction } = require('discord.js');
+const { SlashCommandBuilder, ChatInputCommandInteraction } = require('discord.js');
 const Lorra = require('../../client/Lorra');
 const SlashCommand = require('../../structures/command/SlashCommand');
 const CommandStatus = require('../../util/CommandStatus');
@@ -18,9 +18,11 @@ class ReloadCommand extends SlashCommand {
 
     /**
      * @param {Lorra} client 
-     * @param {CommandInteraction} interaction 
+     * @param {ChatInputCommandInteraction} interaction 
      */
-    async execute(client, interaction) { }
+    async execute(client, interaction) {
+        return interaction.reply({ content: 'hello', ephemeral: true });
+    }
 }
 
 module.exports = ReloadCommand;
