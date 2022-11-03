@@ -1,8 +1,5 @@
 import EventBase from "./EventBase";
 import ILogger from "./ILogger";
-import {
-    LogLevel
-} from "../util/Enums";
 
 // -- Command Interfaces --
 import { RegistrationType } from "./interactions/RegistrationType";
