@@ -73,18 +73,19 @@ export default class CommandManager {
         const rest = new REST({ version: '10' }).setToken(process.env.TOKEN!);
         // Deploy global commands
         if(commands.get(RegistrationType.GLOBAL)) {
-            rest.put(Routes.applicationCommands(process.env.APP__ID!), 
+            await rest.put(Routes.applicationCommands(process.env.APP__ID!), 
                 { body: commands.get(RegistrationType.GLOBAL) }
             );
         }
         // Deploy guild only commands
+        await rest.put(Routes.applicationGuildCommands(process.env.APP__ID!, process.env.TEST__GUILD!), 
+            { body: [] }
+        );
         if(commands.get(RegistrationType.GUILD)) {
-            rest.put(Routes.applicationGuildCommands(process.env.APP__ID!, process.env.TEST__GUILD!), 
+            await rest.put(Routes.applicationGuildCommands(process.env.APP__ID!, process.env.TEST__GUILD!), 
                 { body: commands.get(RegistrationType.GUILD) }
             );
         }
-
-        
     }
 
     get systems(): string[] { return this._systems; }

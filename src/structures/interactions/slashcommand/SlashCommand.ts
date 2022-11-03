@@ -19,24 +19,25 @@ export default abstract class SlashCommand extends ExecutableCommand {
 
     public execute(client: Lorra, interaction: ChatInputCommandInteraction): void {}
 
-    public getSlashCommandData(): SlashCommandBuilder {
+    public getSlashCommandData() {
         if(this.subcommandGroups) {
             this.subcommandGroups.forEach((value, key) => {
                 value.forEach((cmd) => {
                     key.addSubcommand(cmd.getSubcommandData());
                 });
-                this.commandData?.addSubcommandGroup(key);
+                this.commandData!.addSubcommandGroup(key);
             });
-        } else {
+        }
+        if(this.subcommands && !this.subcommandGroups) {
             this.subcommands.forEach((value) => {
-                this.commandData?.addSubcommand(value.getSubcommandData());
+                this.commandData!.addSubcommand(value.getSubcommandData());
             });
         }
         return this.commandData!;
     }
 
-    public setSlashCommandData(commandData: SlashCommandBuilder): void {
-        this.commandData = commandData;
+    public setSlashCommandData(commandData: Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">|SlashCommandBuilder): void {
+        this.commandData = (commandData as SlashCommandBuilder);
     }
 
     public getSubcommands(): Array<SlashCommandSubCommand> {
