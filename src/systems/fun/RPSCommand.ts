@@ -57,13 +57,9 @@ export default class RPSCommand extends SlashCommand {
         const collector = interaction.channel!.createMessageComponentCollector({ componentType: ComponentType.Button, time: ms('1m'), filter, maxUsers: 2 });
 
         collector.on('collect', (interaction) => {
-            results.set(interaction.user.id, interaction.component.label);
+            results.set(interaction.user.id, interaction.customId);
             interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle(`Selected: ${interaction.component.emoji!.name} ${interaction.component.label}. Good Luck!!!`)
-                        .setColor('Green')
-                ],
+                content: `Selected: ${interaction.component.emoji!.name} ${interaction.component.label}.`,
                 ephemeral: true
             });
         });
