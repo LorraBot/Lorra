@@ -7,7 +7,7 @@ export class GuildSettings {
     @PrimaryGeneratedColumn()
     index!: number;
 
-    @Column({ length: '32' })
+    @Column({ length: '32', unique: true })
     id!: string;
 
     @Column({ name: 'mod_log', length: '32' })
