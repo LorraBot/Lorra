@@ -1,4 +1,4 @@
-import Lorra from "../client/client";
+import Lorra from "../client/Lorra";
 
 export default abstract class EventBase {
     private _eventName: string;

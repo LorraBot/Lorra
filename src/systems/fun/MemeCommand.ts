@@ -1,4 +1,4 @@
-import client from "../../client/client";
+import client from "../../client/Lorra";
 import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { SlashCommand } from "../../structures";
 import Commands from "../../util/Commands";

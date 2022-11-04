@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
-import Lorra from '../client/client';
+import Lorra from '../client/Lorra';
 import { ContextCommand, RegistrationType, SlashCommand } from '../structures';
 import Bot from '../bot';
 import { ApplicationCommandType, Collection, REST, RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord.js';

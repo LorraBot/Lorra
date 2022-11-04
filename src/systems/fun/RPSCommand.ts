@@ -1,4 +1,4 @@
-import Lorra from "../../client/client";
+import Lorra from "../../client/Lorra";
 import { ChatInputCommandInteraction, CacheType, Collection, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, ButtonInteraction, ButtonComponent } from "discord.js";
 import ms from "ms";
 import { SlashCommand } from "../../structures";

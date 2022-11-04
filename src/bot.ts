@@ -2,7 +2,7 @@ import 'dotenv/config';
 import 'reflect-metadata';
 
 import { IntentsBitField } from "discord.js";
-import Lorra from "./client/client";
+import Lorra from "./client/Lorra";
 import Logger from './util/Logger';
 
 export default class Bot {

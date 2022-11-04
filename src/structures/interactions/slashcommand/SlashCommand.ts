@@ -1,4 +1,4 @@
-import Lorra from "client/client";
+import Lorra from "client/Lorra";
 import { 
     ChatInputCommandInteraction, 
     Collection, 

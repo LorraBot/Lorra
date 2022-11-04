@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import Bot from '../bot';
 import { EventBase } from '../structures';
-import Lorra from '../client/client';
+import Lorra from '../client/Lorra';
 
 export default class EventManager {
     private client: Lorra;
