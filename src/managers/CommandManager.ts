@@ -20,8 +20,8 @@ export default class CommandManager {
         this.client = client;
         this.initialise()
             .then(() => this.deploy())
-            .catch((reason) => Bot.logger.error(reason, 'red'))
-            .finally(() => Bot.logger.test("✅ Registered Commands!", 'green'));
+            .catch((reason) => Bot.logger.error(reason))
+            .finally(() => Bot.logger.test("✅ Registered Commands!"));
     }
 
     async initialise(dir: string = 'systems/'): Promise<void> {

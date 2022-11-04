@@ -10,7 +10,7 @@ export default class EventManager {
     constructor(client: Lorra) {
         this.client = client;
         this.initialise().finally(() => {
-            Bot.logger.test('✅ Events Registered!', 'green')
+            Bot.logger.test('✅ Events Registered!')
         });
     }
 
@@ -20,7 +20,7 @@ export default class EventManager {
         for (const file of files) {
             const filePath = path.join(eventsPath, file);
             const { default: Event } = require(filePath);
-            if (Event !instanceof EventBase) return Bot.logger.error(`Filed to load ${file}`, 'red');
+            if (Event !instanceof EventBase) return Bot.logger.error(`Filed to load ${file}`);
             const ev = new Event();
             this.client.on(ev.eventName, ev.execute.bind(ev, this.client));
         }

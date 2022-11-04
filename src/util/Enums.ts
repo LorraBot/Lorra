@@ -1,9 +1,8 @@
 export enum LogLevel {
-    INFO,
-    TEST,
-    SHARD,
-    CRITICAL,
-    ERROR
+    INFO = "INFO",
+    TEST = "TEST",
+    SHARD = "SHARD",
+    ERROR = "ERROR"
 }
 
 export enum BotColor {
