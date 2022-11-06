@@ -22,10 +22,14 @@ import {
     Collection, 
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction, 
+    REST, 
+    RESTPostAPIApplicationCommandsJSONBody, 
+    Routes, 
     SelectMenuInteraction, 
     UserContextMenuCommandInteraction 
 } from 'discord.js';
 import ms from 'ms';
+import { RegistrationType } from '../util/Enums';
 
 /**
  * The Interaction class, that finds, registers and handles all Commands and other Interactions.
@@ -57,6 +61,7 @@ export default class InteractionManager {
      */
     private _handlerIndex: Collection<string, ComponentHandler> = new Collection();
 
+    private commands: Collection<RegistrationType, RESTPostAPIApplicationCommandsJSONBody[]> = new Collection();
     private client: Lorra;
 
     /**
@@ -73,12 +78,46 @@ export default class InteractionManager {
     }
 
     /**
-     * Deploy all commands
+     * Register all commands to the DiscordAPI
+     * (*) SlashCommands
+     * (*) ContextCommands
      */
-    public async registerInteractions() {}
+    public registerInteractions() {
+        setTimeout(async () => {
+            const rest = new REST({ version: '10' }).setToken(process.env.TOKEN!);
 
-    private async findSlashCommands(dir: string = "../systems/"): Promise<Set<SlashCommand.Command>> {
-        var commands: Set<SlashCommand.Command> = new Set();
+            /**
+             * Publish all global commands to the discord API
+             */
+            await rest.put(Routes.applicationCommands(process.env.APP__ID!), { 
+                body: this.commands.get(RegistrationType.GLOBAL) 
+            }).then(() => Bot.logger.info("Successfully loaded global commands."));
+
+            /**
+             * Publish all guild-only commands to the discord API
+             */
+            await rest.put(Routes.applicationGuildCommands(process.env.APP__ID!, process.env.TEST__GUILD!), { 
+                body: this.commands.get(RegistrationType.GUILD) 
+            }).then(() => Bot.logger.info("Successfully loaded guild-only commands."));
+        }, ms('30s'));
+    }
+
+    /**
+     * Adds a command to the command index base on {@link RegistrationType}
+     * @param command Command to register
+     * @param type Type of which the command will be registered
+     */
+    private addCommand(command: SlashCommand.Command|ContextCommand.Command, type: RegistrationType) {
+        if(!this.commands.get(type)) this.commands.set(type, Array.of());
+        var commandData = (command as SlashCommand.Command).getSlashCommandData()||(command as ContextCommand.Command).getCommandData();
+        this.commands.get(type)?.push(commandData.toJSON());
+    }
+
+    /**
+     * Find and Register all {@link SlashCommand}s
+     * @param dir Location of {@link SlashCommand}s
+     */
+    private async findSlashCommands(dir: string = "../systems/"): Promise<void> {
         const basePath = path.join(__dirname, dir);
         const files = await fs.readdir(basePath);
         for (const file of files) {
@@ -90,15 +129,17 @@ export default class InteractionManager {
                 const command = new Command();
                 if(command instanceof SlashCommand.Command) {
                     this._slashCommandIndex.set(command.getSlashCommandData().name, command);
-                    commands.add(command);
+                    this.addCommand(command, command.getRegistrationType());
                 }
             }
         }
-        return commands;
     }
 
-    private async findContextCommands(dir: string = "../systems/"): Promise<Set<ContextCommand.Command>> {
-        var commands: Set<ContextCommand.Command> = new Set();
+    /**
+     * Find and Registers all {@link ContextCommand}s
+     * @param dir Location of {@link ContextCommand}s
+     */
+    private async findContextCommands(dir: string = "../systems/"): Promise<void> {
         const basePath = path.join(__dirname, dir);
         const files = await fs.readdir(basePath);
         for (const file of files) {
@@ -109,7 +150,7 @@ export default class InteractionManager {
                 const { default: Command } = await import(filePath);
                 const command = new Command();
                 if(command instanceof ContextCommand.Command) {
-                    commands.add(command);
+                    this.addCommand(command, command.getRegistrationType());
                     switch(true) {
                         case command instanceof ContextCommand.User:
                             this._userContextIndex.set(command.getCommandData().name, command as ContextCommand.User);
@@ -121,9 +162,12 @@ export default class InteractionManager {
                 }
             }
         }
-        return commands;
     }
 
+    /**
+     * Finds and Registers all {@link ComponentHandler}s
+     * @param dir Location of {@link ComponentHandler}s
+     */
     private async findInteractionHandlers(dir: string = "../systems/"): Promise<void> {
         const basePath = path.join(__dirname, dir);
         const files = await fs.readdir(basePath);
@@ -141,6 +185,11 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Register all {@link ComponentHandler}s
+     * @param handler {@link ComponentHandler} instance
+     * @returns 
+     */
     private putComponentHandlers(handler?: ComponentHandler): void {
         if(handler === null) return;
         handler?.getHandleButtonIds().forEach(s => this._handlerIndex.set(s, handler));
@@ -148,6 +197,10 @@ export default class InteractionManager {
         handler?.getHandleModalIds().forEach(s => this._handlerIndex.set(s, handler));
     }
 
+    /**
+     * Handle all {@link ChatInputCommandInteraction}s
+     * @param interaction SlashCommand interaction response
+     */
     public handleSlashCommand(interaction: ChatInputCommandInteraction) {
         const commandName: string = interaction.commandName;
         const req = this._slashCommandIndex.has(commandName) ? this._slashCommandIndex.get(commandName) : this._subcommandIndex.get(commandName);
@@ -162,6 +215,10 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Handle all {@link UserContextMenuCommandInteraction}s
+     * @param interaction UserContext interaction response
+     */
     public handleUserContextCommand(interaction: UserContextMenuCommandInteraction) {
         var context: ContextCommand.User = this._userContextIndex.get(interaction.commandName)!;
         if(context === null) {
@@ -171,6 +228,10 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Handle all {@link MessageContextMenuCommandInteraction}s
+     * @param interaction MessageContext interaction response
+     */
     public handleMessageContextCommand(interaction: MessageContextMenuCommandInteraction) {
         var context: ContextCommand.Message = this._messageContextIndex.get(interaction.commandName)!;
         if(context === null) {
@@ -180,6 +241,10 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Handle all {@link ButtonInteraction}s
+     * @param interaction Button interaction response
+     */
     public handleButton(interaction: ButtonInteraction) {
         var component: ComponentHandler = this._handlerIndex.get(ComponentIdBuilder.split(interaction.customId)[0])!;
         if(component === null) {
@@ -189,6 +254,10 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Handle all {@link SelectMenuInteraction}s
+     * @param interaction SelectMenu interaction response
+     */
     public handleSelectMenu(interaction: SelectMenuInteraction) {
         var component: ComponentHandler = this._handlerIndex.get(ComponentIdBuilder.split(interaction.customId)[0])!;
         if(component === null) {
@@ -198,6 +267,10 @@ export default class InteractionManager {
         }
     }
 
+    /**
+     * Handle all {@link ModalSubmitInteraction}s
+     * @param interaction Modal interaction response
+     */
     public handleModal(interaction: ModalSubmitInteraction) {
         var modal: ComponentHandler = this._handlerIndex.get(ComponentIdBuilder.split(interaction.customId)[0])!;
         if(modal === null) {
