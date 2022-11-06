@@ -83,6 +83,8 @@ export default class InteractionManager {
      * (*) ContextCommands
      */
     public registerInteractions() {
+        this.client.application?.commands.set([]);
+        this.client.guilds.cache.get(process.env.TEST__GUILD!)?.commands.set([]);
         setTimeout(async () => {
             const rest = new REST({ version: '10' }).setToken(process.env.TOKEN!);
 
@@ -109,7 +111,19 @@ export default class InteractionManager {
      */
     private addCommand(command: SlashCommand.Command|ContextCommand.Command, type: RegistrationType) {
         if(!this.commands.get(type)) this.commands.set(type, Array.of());
-        var commandData = (command as SlashCommand.Command).getSlashCommandData()||(command as ContextCommand.Command).getCommandData();
+        var commandData;
+        switch(true) {
+            case command instanceof SlashCommand.Command:
+                commandData = (command as SlashCommand.Command).getSlashCommandData();
+                this.slashCommandIndex.set(commandData.name, (command as SlashCommand.Command));
+                break;
+            case command instanceof ContextCommand.Command:
+                commandData = (command as ContextCommand.Command).getCommandData();
+                break;
+            default:
+                commandData = null;
+        }
+        if(!commandData) return;
         this.commands.get(type)?.push(commandData.toJSON());
     }
 
@@ -128,8 +142,11 @@ export default class InteractionManager {
                 const { default: Command } = await import(filePath);
                 const command = new Command();
                 if(command instanceof SlashCommand.Command) {
-                    this._slashCommandIndex.set(command.getSlashCommandData().name, command);
                     this.addCommand(command, command.getRegistrationType());
+                    for(const c of command.getSubcommands()) {
+                        var name = ComponentIdBuilder.build(command.getSlashCommandData().name, c.getSubcommandData().name);
+                        this._subcommandIndex.set(name, c);
+                    }
                 }
             }
         }
@@ -203,15 +220,12 @@ export default class InteractionManager {
      */
     public handleSlashCommand(interaction: ChatInputCommandInteraction) {
         const commandName: string = interaction.commandName;
-        const req = this._slashCommandIndex.has(commandName) ? this._slashCommandIndex.get(commandName) : this._subcommandIndex.get(commandName);
-        if(req === null) {
-            // Throws error
-        } else {
-            if(this._slashCommandIndex.has(commandName)) {
-                this._slashCommandIndex.get(commandName)?.execute(this.client, interaction);
-            } else {
-                this._subcommandIndex.get(commandName)?.execute(interaction);
-            }
+        if(this._slashCommandIndex.has(commandName)) {
+            this._slashCommandIndex.get(commandName)?.execute(this.client, interaction);
+            if(interaction.options.getSubcommand())
+                this._subcommandIndex.get(
+                    ComponentIdBuilder.build(commandName, interaction.options.getSubcommand()))
+                    ?.execute(this.client, interaction);
         }
     }
 

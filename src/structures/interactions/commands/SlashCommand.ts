@@ -22,7 +22,7 @@ export namespace SlashCommand {
         public execute(client: Lorra, interaction: ChatInputCommandInteraction): void {}
 
         public getSlashCommandData() {
-            if(this.subcommandGroups) {
+            if(this.subcommandGroups.size > 0) {
                 this.subcommandGroups.forEach((value, key) => {
                     value.forEach((cmd) => {
                         key.addSubcommand(cmd.getSubcommandData());
@@ -30,10 +30,10 @@ export namespace SlashCommand {
                     this.commandData!.addSubcommandGroup(key);
                 });
             }
-            if(this.subcommands && !this.subcommandGroups) {
-                this.subcommands.forEach((value) => {
-                    this.commandData!.addSubcommand(value.getSubcommandData());
-                });
+            if(this.subcommands.length > 0) {
+                for(const command of this.subcommands) {
+                    this.commandData!.addSubcommand(command.getSubcommandData());
+                }
             }
             return this.commandData!;
         }
@@ -42,7 +42,7 @@ export namespace SlashCommand {
             this.commandData = (commandData as SlashCommandBuilder);
         }
 
-        public getSubcommands(): Array<SlashCommand.Subcommand> {
+        public getSubcommands(): SlashCommand.Subcommand[] {
             return this.subcommands;
         }
 
@@ -69,6 +69,6 @@ export namespace SlashCommand {
             this.data = subCommandData;
         }
     
-        public abstract execute(interaction: ChatInputCommandInteraction): void;
+        public abstract execute(client: Lorra, interaction: ChatInputCommandInteraction): void;
     }
 }
