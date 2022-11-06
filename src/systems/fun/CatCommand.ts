@@ -5,7 +5,7 @@ import Commands from "../../util/Commands";
 import { default as axios } from 'axios';
 import ms from "ms";
 
-export default class CatCommand extends SlashCommand {
+export default class CatCommand extends SlashCommand.Command {
     private _results: any;
     private _timeout: number|null = null;
 

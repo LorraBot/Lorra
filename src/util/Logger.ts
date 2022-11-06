@@ -16,11 +16,11 @@ export default class Logger implements ILogger {
     test(message: any): void {
         return this.log(this.getFormat(LogLevel.TEST, message));
     }
-    shard(message: any): void {
-        return this.log(this.getFormat(LogLevel.SHARD, message));
-    }
     error(message: any): void {
         return this.log(this.getFormat(LogLevel.ERROR, message));
+    }
+    warn(message: any): void {
+        return this.log(this.getFormat(LogLevel.WARN, message));
     }
 
     /**
@@ -29,7 +29,7 @@ export default class Logger implements ILogger {
     private getFormat(level: LogLevel, message: any): string {
         const format = "(%date%) [%level%]: %message%";
         const fdate = new Date(Date.now()).toUTCString();
-        const color = { "INFO": 'blue', "TEST": 'green', "SHARD": 'cyan', "ERROR": 'redBright' }[level];
+        const color = { "INFO": 'blue', "TEST": 'green', "ERROR": 'redBright',"WARN": "red"}[level];
         return chalk.gray(format)
             .replace("%date%", chalk.yellow(fdate))
             .replace("%level%", chalk`{${color} ${level}}`)

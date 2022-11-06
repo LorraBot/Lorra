@@ -18,6 +18,7 @@ export default class Bot {
                 IntentFlags.MessageContent
             ]
         });
+        this.client.interactionManager.registerInteractions();
         this.client.login(process.env.TOKEN);
     }
 

@@ -5,7 +5,7 @@ import { SlashCommand } from "../../structures";
 import Commands from "../../util/Commands";
 import { BotColor } from "../../util/Enums";
 
-export default class RPSCommand extends SlashCommand {
+export default class RPSCommand extends SlashCommand.Command {
     constructor() {
         super();
         this.setSlashCommandData(Commands.slash("rps", "🪨Rock.. 📃Paper.. ✂️Scissors.. SHOOT!")

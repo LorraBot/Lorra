@@ -1,3 +1,4 @@
+import { Events } from "discord.js";
 import Bot from "../bot";
 import Lorra from "../client/Lorra";
 import { EventBase } from "../structures";
@@ -5,7 +6,7 @@ import { EventBase } from "../structures";
 export default class ReadyEvent extends EventBase {
 
     constructor() {
-        super("ready");
+        super(Events.ClientReady);
     }
 
     execute(client: Lorra): void {

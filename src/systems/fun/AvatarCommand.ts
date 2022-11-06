@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction, CacheType, EmbedBuilder } from "discord.js
 import { SlashCommand } from "../../structures";
 import Commands from "../../util/Commands";
 
-export default class AvatarCommand extends SlashCommand {
+export default class AvatarCommand extends SlashCommand.Command {
     constructor() {
         super();
         this.setSlashCommandData(Commands.slash('avatar', 'See yours or someone elses avatar.')

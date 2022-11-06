@@ -2,12 +2,12 @@ import Bot from "../bot";
 import { Client, ClientOptions } from "discord.js";
 import ms from "ms";
 import { DataSource } from "typeorm";
-import { GuildSettingsManager, CommandManager, EventManager } from "../managers";
+import { GuildSettingsManager, InteractionManager, EventManager } from "../managers";
 import { entities } from "../util/typeorm";
 
 export default class Lorra extends Client {
     private _dataSource: DataSource;
-    private _commandManager: CommandManager;
+    private _interactionManager: InteractionManager;
     private _eventManager: EventManager;
     private _guildSettingsManager: GuildSettingsManager;
 
@@ -44,7 +44,7 @@ export default class Lorra extends Client {
         /**
          * Register commands
          */
-        this._commandManager = new CommandManager(this);
+        this._interactionManager = new InteractionManager(this);
     }
 
     get dataSource(): Promise<DataSource> { 
@@ -63,5 +63,5 @@ export default class Lorra extends Client {
      */
     get guildSettingsManager(): GuildSettingsManager { return this._guildSettingsManager; }
     get eventManager(): EventManager { return this._eventManager; }
-    get commandManager(): CommandManager { return this._commandManager; }
+    get interactionManager(): InteractionManager { return this._interactionManager; }
 }

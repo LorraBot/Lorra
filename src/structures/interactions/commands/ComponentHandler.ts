@@ -39,8 +39,8 @@ export default abstract class ComponentHandler {
     /**
      * Select Menus
      */
-    public getHandledSelectMenuIds() {
-        this.handledSelectMenuIds;
+    public getHandleSelectMenuIds(): string[] {
+        return this.handledSelectMenuIds;
     }
 
     public handleSelectMenuIds(...values: string[]): void {
@@ -52,8 +52,8 @@ export default abstract class ComponentHandler {
     /**
      * Modals
      */
-    public getHandledModalIds() {
-        this.handledModalIds;
+    public getHandleModalIds(): string[] {
+        return this.handledModalIds;
     }
 
     public handleModalIds(...values: string[]): void {

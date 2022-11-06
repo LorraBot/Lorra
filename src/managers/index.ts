@@ -1,9 +1,9 @@
 import EventManager from "./EventManager";
-import CommandManager from "./CommandManager";
+import InteractionManager from "./InteractionManager";
 import GuildSettingsManager from "./GuildSettingsManager";
 
 export {
     GuildSettingsManager,
-    CommandManager,
+    InteractionManager,
     EventManager
 }

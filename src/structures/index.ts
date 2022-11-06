@@ -2,12 +2,10 @@ import EventBase from "./EventBase";
 import ILogger from "./ILogger";
 
 // -- Command Interfaces --
-import { RegistrationType } from "./interactions/RegistrationType";
-import SlashCommand from "./interactions/slashcommand/SlashCommand";
-import SlashCommandSubCommand from "./interactions/slashcommand/SlashCommandSubCommand";
-import ContextCommand from "./interactions/contextcommand/ContextCommand";
-import MessageContextCommand from "./interactions/contextcommand/MessageContextCommand";
-import UserContextCommand from "./interactions/contextcommand/UserContextCommand";
+import ComponentIdBuilder from "./interactions/CompoentIdBuilder";
+import { SlashCommand } from "./interactions/commands/SlashCommand";
+import { ContextCommand } from "./interactions/commands/ContextCommand";
+import ComponentHandler from "./interactions/commands/ComponentHandler";
 // ----
 
 /**
@@ -16,13 +14,9 @@ import UserContextCommand from "./interactions/contextcommand/UserContextCommand
 export {
     EventBase,
     ILogger,
-    // Enums
-    RegistrationType,
-    // SlashCommand Interfaces
+    // Interaction Interfaces
+    ComponentIdBuilder,
     SlashCommand,
-    SlashCommandSubCommand,
-    // ContextCommand Interfaces
     ContextCommand,
-    MessageContextCommand,
-    UserContextCommand
+    ComponentHandler
 };
