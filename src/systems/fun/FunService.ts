@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, ComponentBuilder, EmbedBuilder } from "discord.js";
 import Utils from "../../util/Utils";
-import { BotColor, ButtonIds } from "../../util/Enums";
+import { BotColor, ComponentIds } from "../../util/Enums";
 import { ComponentIdBuilder } from "../../structures";
 
 export default class FunService {
@@ -8,25 +8,23 @@ export default class FunService {
 
     public handleTod(interaction: ChatInputCommandInteraction|ButtonInteraction) {
         const truthBtn = new ButtonBuilder()
-            .setCustomId(ComponentIdBuilder.build(ButtonIds.TOD, "truth"))
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.TodButton, "truth"))
             .setLabel('Truth')
             .setStyle(ButtonStyle.Success);
         const dareBtn = new ButtonBuilder()
-            .setCustomId(ComponentIdBuilder.build(ButtonIds.TOD, "dare"))
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.TodButton, "dare"))
             .setLabel('Dare')
             .setStyle(ButtonStyle.Danger);
         const randomBtn = new ButtonBuilder()
-            .setCustomId(ComponentIdBuilder.build(ButtonIds.TOD, "random"))
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.TodButton, "random"))
             .setLabel('Random')
             .setStyle(ButtonStyle.Primary);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(truthBtn, dareBtn, randomBtn);
         
-        const type = (interaction as ButtonInteraction).customId||"random";
-        var t;
         const types = ["truth", "dare"];
-        if(type === "random") t = types[Math.floor(Math.random() * types.length)]
-        else t = ComponentIdBuilder.split(type)[1];
-        const route = `https://api.truthordarebot.xyz/v1/${t}`;
+        var type = ComponentIdBuilder.split((interaction as ButtonInteraction).customId)[1];
+        if(type === "random") type = types[Math.floor(Math.random() * types.length)];
+        const route = `https://api.truthordarebot.xyz/v1/${type}`;
 
         const TODEmbed = new EmbedBuilder();
         Utils.request(route).then(async (res) => {

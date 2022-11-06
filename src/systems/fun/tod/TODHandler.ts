@@ -1,12 +1,12 @@
 import { ButtonInteraction } from "discord.js";
-import { ButtonIds } from "../../../util/Enums";
+import { ComponentIds } from "../../../util/Enums";
 import { ComponentHandler } from "../../../structures";
 import FunService from "../FunService";
 
 export default class TODHandler extends ComponentHandler {
     constructor() {
         super();
-        this.handleButtonIds(ButtonIds.TOD);
+        this.handleButtonIds(ComponentIds.TodButton);
     }
 
     public handleButton(buttonInteraction: ButtonInteraction) {

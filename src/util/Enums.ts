@@ -27,7 +27,7 @@ export enum BotColor {
 /**
  * All button ids
  */
-export enum ButtonIds {
-    TOD = "tod",
-    RPS = "rps"
+export enum ComponentIds {
+    TodButton = "tod-button",
+    RpsButton = "rps-button"
 }
