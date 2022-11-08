@@ -6,7 +6,7 @@ import { ComponentIdBuilder } from "../../structures";
 export default class FunService {
     constructor() {}
 
-    public handleTod(interaction: ChatInputCommandInteraction|ButtonInteraction) {
+    public handleTod(chatOrButtonInteraction: ChatInputCommandInteraction|ButtonInteraction) {
         const truthBtn = new ButtonBuilder()
             .setCustomId(ComponentIdBuilder.build(ComponentIds.TodButton, "truth"))
             .setLabel('Truth')
@@ -20,23 +20,31 @@ export default class FunService {
             .setLabel('Random')
             .setStyle(ButtonStyle.Primary);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(truthBtn, dareBtn, randomBtn);
+
+        var t;
+        switch(true) {
+            case chatOrButtonInteraction instanceof ChatInputCommandInteraction:
+                t = "random";
+                break;
+            default:
+                t = ComponentIdBuilder.split((chatOrButtonInteraction as ButtonInteraction).customId)[1];
+        }
         
         const types = ["truth", "dare"];
-        var type = ComponentIdBuilder.split((interaction as ButtonInteraction).customId)[1];
-        if(type === "random") type = types[Math.floor(Math.random() * types.length)];
-        const route = `https://api.truthordarebot.xyz/v1/${type}`;
+        if(t === "random") t = types[Math.floor(Math.random() * types.length)];
+        const route = `https://api.truthordarebot.xyz/v1/${t}`;
 
         const TODEmbed = new EmbedBuilder();
         Utils.request(route).then(async (res) => {
             TODEmbed.setAuthor({
-                    name: `Requested by ${interaction.user.username}`,
-                    iconURL: interaction.user.displayAvatarURL()})
+                    name: `Requested by ${chatOrButtonInteraction.user.username}`,
+                    iconURL: chatOrButtonInteraction.user.displayAvatarURL()})
                 .setTitle(res.question)
                 .setColor(res.type === "DARE" ? BotColor.Red : BotColor.Blue)
                 .setFooter({ text: `${res.type} |${res.rating} • ID: ${res.id}`});
-            return await interaction.reply({ embeds: [TODEmbed], components: [row] });
+            return await chatOrButtonInteraction.reply({ embeds: [TODEmbed], components: [row] });
         }).catch(async (reason) => 
-            await interaction.reply({ 
+            await chatOrButtonInteraction.reply({ 
                 embeds: [TODEmbed.setTitle(String(reason)).setColor('DarkRed')], 
                 ephemeral: true 
             })
