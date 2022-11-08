@@ -1,7 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, ComponentBuilder, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChatInputCommandInteraction, ComponentBuilder, ComponentType, EmbedBuilder } from "discord.js";
 import Utils from "../../util/Utils";
 import { BotColor, ComponentIds } from "../../util/Enums";
 import { ComponentIdBuilder } from "../../structures";
+import ms from "ms";
 
 export default class FunService {
     constructor() {}
@@ -80,7 +81,79 @@ export default class FunService {
         );
     }
 
-    public handleRps() {
-        
+    public async handleRps(interaction: ChatInputCommandInteraction) {
+        const user = interaction.options.getUser("user", false);
+        // -- Components --
+        const RBtn = new ButtonBuilder()
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.RpsButton, "rock"))
+            .setEmoji('🪨')
+            .setLabel('Rock')
+            .setStyle(ButtonStyle.Danger);
+        const PBtn = new ButtonBuilder()
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.RpsButton, "paper"))
+            .setEmoji('📃')
+            .setLabel('Paper')
+            .setStyle(ButtonStyle.Primary);
+        const SBtn = new ButtonBuilder()
+            .setCustomId(ComponentIdBuilder.build(ComponentIds.RpsButton, "scissors"))
+            .setEmoji('✂️')
+            .setLabel('Scissors')
+            .setStyle(ButtonStyle.Secondary);
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(RBtn, PBtn, SBtn);
+        // ----
+
+        await interaction.reply({
+            content: `${user ? `${user}` : ""}`,
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle('Rock..Paper..Scissors.. SHOOT!!')
+                    .setColor(BotColor.Invisible)
+                    .setDescription(`*Click a button to enter your response*`)
+            ],
+            components: [row]
+        });
+
+        var userResponse: string;
+        var targetOrBotResponse: string|null;
+
+        const filter = (i:ButtonInteraction) => i.user.id === interaction.user.id||i.user.id===user?.id;
+        const collector = interaction.channel?.createMessageComponentCollector({
+            componentType: ComponentType.Button,
+            maxUsers: user ? 2 : 1,
+            time: ms("1m"),
+            filter
+        });
+
+        collector?.on('collect', (i) => {
+            if(!i.customId.includes(ComponentIds.RpsButton)) return;
+            var customId = ComponentIdBuilder.split(i.customId)[1];
+            i.reply({ content: `You have selected: ${i.component.label}`, ephemeral: true });
+            if(user) {
+                i.user.id===interaction.user.id ? userResponse=customId : targetOrBotResponse=customId;
+            } else userResponse=customId;
+        });
+
+        collector?.on('end', async () => {
+            var responses = ["rock", "paper", "scissors"];
+            if(!user) targetOrBotResponse = responses[Math.floor(Math.random() * responses.length)];
+            // -- End Game --
+            row.components.forEach((value: any) => value.setDisabled(true));
+            const nEmbed = new EmbedBuilder()
+                .setTitle('Session expired')
+                .setColor(BotColor.Red)
+                .setTimestamp();
+            // await interaction.editReply({ content: '', embeds: [nEmbed], components: [row] })
+            // ----
+            var resEmbed = new EmbedBuilder().setColor('Yellow');
+            if(userResponse === targetOrBotResponse) 
+                return void await interaction.editReply({ embeds: [resEmbed.setTitle('Looks like it was a draw 🤷')] ,components: [row] });
+            var u = user ? `${user.username}` : `${interaction.client.user.username}`
+            if (userResponse === 'rock' && targetOrBotResponse === 'paper'||
+            userResponse === 'paper' && targetOrBotResponse === 'scissors'||
+            userResponse === 'scissors' && targetOrBotResponse === 'rock') {
+                resEmbed.setTitle(`🎉 ${u} has Won! 🎉`);
+            } else { resEmbed.setTitle(`🎉 ${interaction.user.username} has Won! 🎉`); }
+            return void await interaction.editReply({ embeds: [resEmbed], components: [row] });
+        });
     }
 }
